@@ -9,7 +9,10 @@
         <div
           class="flex-1 flex-row bg-white rounded-t rounded-b-none overflow-hidden shadow-lg"
         >
-          <a href="#" class="flex flex-wrap no-underline hover:no-underline">
+          <RouterLink
+            :to="`/p/${post.id}`"
+            class="flex flex-wrap no-underline hover:no-underline"
+          >
             <img
               :src="`https://placeimg.com/400/320/people?index=${index}`"
               class="h-full w-full rounded-t pb-6"
@@ -17,10 +20,12 @@
             <div class="w-full font-bold text-xl text-gray-900 px-6">
               {{ post.title }}
             </div>
-            <p class="text-gray-800 font-serif text-base px-6 mb-5 truncate">
+            <p
+              class="text-gray-800 font-serif text-base px-6 mb-5 line-clamp-2"
+            >
               {{ post.content }}
             </p>
-          </a>
+          </RouterLink>
         </div>
         <div
           class="flex-none mt-auto bg-white rounded-b rounded-t-none overflow-hidden shadow-lg p-6"
@@ -58,22 +63,19 @@ import moment from "moment";
 export default {
   data() {
     return {
-      search: "",
-      searchResults: [],
       posts: [],
       leaders: [],
-      author: "",
       apiUrl: import.meta.env.VITE_GRAPHQL_API_URL,
       apiKey: import.meta.env.VITE_GRAPHQL_API_KEY,
     };
   },
 
   mounted() {
-    this.getPost();
+    this.getPosts();
   },
 
   methods: {
-    getPost() {
+    getPosts() {
       const body = {
         query: `
           query postByCategory {
@@ -100,44 +102,44 @@ export default {
         },
       };
       axios.post(this.apiUrl, body, options).then((response) => {
-        this.searchResults = response.data.data.postByCategory.items;
-        this.searchResults.forEach((item) => {
+        response.data.data.postByCategory.items.forEach((item) => {
           this.posts.push({
+            id: item.id,
             leaderID: item.leaderID,
             leaderName: "-",
             leaderPicUrl: null,
             title: item.title,
-            content: item.content,
+            content: item.content.substring(0, 100),
             date: item.dateTo,
           });
         });
-        console.log(this.posts);
-
-        this.posts.forEach((item) => {
-          const body = {
-            query: `
-            query getLeader {
-              getLeader(id: "${item.leaderID}") {
-                id
-                name
-                path
-                picUrl
-              }
+        this.getLeaders();
+      });
+    },
+    getLeaders() {
+      this.posts.forEach((item) => {
+        const body = {
+          query: `
+          query getLeader {
+            getLeader(id: "${item.leaderID}") {
+              id
+              name
+              path
+              picUrl
             }
-          `,
-            variables: {},
-          };
-          const options = {
-            headers: {
-              "x-api-key": this.apiKey,
-            },
-          };
-          axios.post(this.apiUrl, body, options).then((response) => {
-            item.leaderName = response.data.data.getLeader.name;
-            item.leaderPicUrl = response.data.data.getLeader.picUrl;
-          });
+          }
+        `,
+          variables: {},
+        };
+        const options = {
+          headers: {
+            "x-api-key": this.apiKey,
+          },
+        };
+        axios.post(this.apiUrl, body, options).then((response) => {
+          item.leaderName = response.data.data.getLeader.name;
+          item.leaderPicUrl = response.data.data.getLeader.picUrl;
         });
-        console.log(this.posts);
       });
     },
     dateTime(value) {
