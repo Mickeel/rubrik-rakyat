@@ -65,6 +65,7 @@ export default {
     return {
       posts: [],
       leaders: [],
+      leadersQuery: "",
       apiUrl: import.meta.env.VITE_GRAPHQL_API_URL,
       apiKey: import.meta.env.VITE_GRAPHQL_API_KEY,
     };
@@ -117,28 +118,33 @@ export default {
       });
     },
     getLeaders() {
-      this.posts.forEach((item) => {
-        const body = {
-          query: `
-          query getLeader {
-            getLeader(id: "${item.leaderID}") {
-              id
-              name
-              path
-              picUrl
-            }
+      this.leadersQuery = "query getLeaders {";
+      this.posts.forEach((item, index) => {
+        this.leadersQuery += `
+          leader${index}: getLeader(id: "${item.leaderID}") {
+            id
+            name
+            path
+            picUrl
           }
-        `,
-          variables: {},
-        };
-        const options = {
-          headers: {
-            "x-api-key": this.apiKey,
-          },
-        };
-        axios.post(this.apiUrl, body, options).then((response) => {
-          item.leaderName = response.data.data.getLeader.name;
-          item.leaderPicUrl = response.data.data.getLeader.picUrl;
+        `;
+      });
+      this.leadersQuery += "}";
+
+      const body = {
+        query: this.leadersQuery,
+        variables: {},
+      };
+      const options = {
+        headers: {
+          "x-api-key": this.apiKey,
+        },
+      };
+      axios.post(this.apiUrl, body, options).then((response) => {
+        const res = response.data.data;
+        this.posts.forEach((post, index) => {
+          const data = res[`leader${index}`];
+          post.leaderName = data.name
         });
       });
     },
@@ -147,7 +153,7 @@ export default {
     },
     getAvatar(url, name) {
       if (url == null) {
-        return "http://i.pravatar.cc/300?index=${name}";
+        return `http://i.pravatar.cc/300?index=${name}`;
       }
       return url;
     },
