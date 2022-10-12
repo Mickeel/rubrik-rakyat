@@ -6,7 +6,7 @@
   <div
     class="container w-full max-w-6xl mx-auto bg-white bg-cover mt-8 rounded"
     style="
-      background-image: url('https://placeimg.com/400/320/people');
+      background-image: url('https://placeimg.com/400/320/people?key=about');
       height: 75vh;
     "
   ></div>
