@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center pt-16 md:pt-32">
+  <div class="text-center pt-16 md:pt-20">
     <p v-if="post.dateTo" class="text-sm md:text-base text-green-500 font-bold">
       {{ dateTime(post.dateTo) }} <span class="text-gray-900">/</span>
       {{ post.leaderName }}
@@ -18,7 +18,7 @@
   <div class="container max-w-5xl mx-auto -mt-32">
     <div class="mx-0 sm:mx-6">
       <div
-        class="bg-white w-full p-8 md:p-24 text-xl text-gray-800 leading-normal"
+        class="bg-white w-full p-8 md:p-24 text-lg md:text-xl text-gray-800 leading-normal"
         style="font-family: Georgia, serif"
       >
         <div class="content" v-html="post.content"></div>

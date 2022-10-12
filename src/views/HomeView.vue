@@ -1,5 +1,5 @@
 <template>
-  <main class="container mx-auto">
+  <main class="container px-4 md:px-0 max-w-6xl mx-auto">
     <div class="flex flex-wrap justify-between pt-12 -mx-6">
       <div
         v-for="(post, index) in posts"
