@@ -48,12 +48,12 @@
         </div>
       </div>
     </div>
-    <Pagination />
+    <Paginator :nextToken="nextToken" @load-more="loadMore" />
   </main>
 </template>
 
 <script setup>
-import Pagination from "./../components/PaginationBar.vue";
+import Paginator from "./../components/PaginatorBar.vue";
 </script>
 
 <script>
@@ -68,19 +68,27 @@ export default {
       leadersQuery: "",
       apiUrl: import.meta.env.VITE_GRAPHQL_API_URL,
       apiKey: import.meta.env.VITE_GRAPHQL_API_KEY,
+      nextToken: "",
+      nextTokenSet: "",
     };
   },
 
   mounted() {
     this.getPosts();
   },
-
   methods: {
     getPosts() {
+      const tokenQuery = this.nextTokenSet
+        ? `nextToken: "` + this.nextTokenSet + `"`
+        : "";
       const body = {
         query: `
           query postByCategory {
-            postByCategory(category: POST, limit: 9) {
+            postByCategory(
+              category: POST
+              limit: 9
+              ${tokenQuery}
+            ) {
               items {
                 id
                 title
@@ -103,7 +111,9 @@ export default {
         },
       };
       axios.post(this.apiUrl, body, options).then((response) => {
-        response.data.data.postByCategory.items.forEach((item) => {
+        const res = response.data.data;
+        this.nextToken = res.postByCategory.nextToken;
+        res.postByCategory.items.forEach((item) => {
           this.posts.push({
             id: item.id,
             leaderID: item.leaderID,
@@ -144,9 +154,13 @@ export default {
         const res = response.data.data;
         this.posts.forEach((post, index) => {
           const data = res[`leader${index}`];
-          post.leaderName = data.name
+          post.leaderName = data.name;
         });
       });
+    },
+    loadMore(n) {
+      this.nextTokenSet = n;
+      this.getPosts();
     },
     dateTime(value) {
       return moment(value).format("MMM D YY");

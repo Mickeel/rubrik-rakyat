@@ -120,7 +120,7 @@ export default {
     },
     getAvatar(url, name) {
       if (url == null) {
-        return "http://i.pravatar.cc/300?index=${name}";
+        return `http://i.pravatar.cc/300?index=${name}`;
       }
       return url;
     },
