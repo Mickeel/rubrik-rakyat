@@ -36,8 +36,6 @@ export default {
   },
   emits: ["loadMore"],
 
-  mounted() {},
-
   methods: {
     nextPage() {
       return {

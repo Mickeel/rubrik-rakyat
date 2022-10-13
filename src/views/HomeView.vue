@@ -2,7 +2,7 @@
   <main class="container px-4 md:px-0 max-w-6xl mx-auto">
     <div class="flex flex-wrap justify-between pt-12 -mx-6">
       <div
-        v-for="(post, index) in posts"
+        v-for="(post, index) in postStore.posts"
         :key="index"
         class="w-full md:w-1/3 p-6 flex flex-col flex-grow flex-shrink"
       >
@@ -41,45 +41,48 @@
             <p class="w-full text-gray-600 text-xs md:text-sm">
               {{ post.leaderName }}
             </p>
-            <p class="text-gray-600 text-xs">
+            <p class="w-2/5 text-right text-gray-600 text-xs md:text-sm">
               {{ dateTime(post.date) }}
             </p>
           </div>
         </div>
       </div>
     </div>
-    <Paginator :nextToken="nextToken" @load-more="loadMore" />
+    <paginator :nextToken="postStore.nextToken" @load-more="loadMore" />
   </main>
 </template>
-
-<script setup>
-import Paginator from "./../components/PaginatorBar.vue";
-</script>
 
 <script>
 import axios from "axios";
 import moment from "moment";
+import Paginator from "@/components/PaginatorBar.vue";
+import { mapStores } from "pinia";
+import { usePostStore } from "@/stores/post";
 
 export default {
+  computed: {
+    ...mapStores(usePostStore),
+  },
+  components: {
+    Paginator,
+  },
   data() {
     return {
-      posts: [],
       leaders: [],
       leadersQuery: "",
       apiUrl: import.meta.env.VITE_GRAPHQL_API_URL,
       apiKey: import.meta.env.VITE_GRAPHQL_API_KEY,
-      nextToken: "",
-      nextTokenSet: "",
     };
   },
 
   mounted() {
-    this.getPosts();
+    if (!this.postStore.posts.length) this.getPosts();
   },
+
   methods: {
     getPosts() {
-      const tokenQuery = this.nextTokenSet
-        ? `nextToken: "` + this.nextTokenSet + `"`
+      const tokenQuery = this.postStore.activeNextToken
+        ? `nextToken: "` + this.postStore.activeNextToken + `"`
         : "";
       const body = {
         query: `
@@ -112,9 +115,9 @@ export default {
       };
       axios.post(this.apiUrl, body, options).then((response) => {
         const res = response.data.data;
-        this.nextToken = res.postByCategory.nextToken;
+        this.postStore.setNextToken(res.postByCategory.nextToken);
         res.postByCategory.items.forEach((item) => {
-          this.posts.push({
+          this.postStore.addPost({
             id: item.id,
             leaderID: item.leaderID,
             leaderName: "-",
@@ -129,7 +132,7 @@ export default {
     },
     getLeaders() {
       this.leadersQuery = "query getLeaders {";
-      this.posts.forEach((item, index) => {
+      this.postStore.posts.forEach((item, index) => {
         this.leadersQuery += `
           leader${index}: getLeader(id: "${item.leaderID}") {
             id
@@ -152,18 +155,18 @@ export default {
       };
       axios.post(this.apiUrl, body, options).then((response) => {
         const res = response.data.data;
-        this.posts.forEach((post, index) => {
+        this.postStore.posts.forEach((post, index) => {
           const data = res[`leader${index}`];
           post.leaderName = data.name;
         });
       });
     },
     loadMore(n) {
-      this.nextTokenSet = n;
+      this.postStore.setActiveNextToken(n);
       this.getPosts();
     },
     dateTime(value) {
-      return moment(value).format("MMM D YY");
+      return moment(value).format("D MMM YY");
     },
     getAvatar(url, name) {
       if (url == null) {
