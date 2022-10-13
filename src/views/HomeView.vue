@@ -32,7 +32,10 @@
         >
           <div class="flex items-center justify-between">
             <div>
-              <figure class="w-8 h-8 rounded-full mr-4 overflow-hidden">
+              <figure
+                v-if="post.leaderName != '-'"
+                class="w-8 h-8 rounded-full mr-4 overflow-hidden"
+              >
                 <img
                   class="object-cover m-auto"
                   data-tippy-content="{{ post.leaderName }}"
