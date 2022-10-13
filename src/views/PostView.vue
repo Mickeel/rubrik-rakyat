@@ -25,6 +25,7 @@
       </div>
 
       <div
+        v-if="post.content"
         class="flex w-full items-center font-sans px-8 pb-8 md:px-24 md:pb-24"
       >
         <img

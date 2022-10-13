@@ -31,13 +31,17 @@
           class="flex-none mt-auto bg-white rounded-b rounded-t-none overflow-hidden shadow-lg p-6"
         >
           <div class="flex items-center justify-between">
-            <img
-              class="w-8 h-8 rounded-full mr-4 avatar"
-              data-tippy-content="{{ post.leaderName }}"
-              :src="getAvatar(post.leaderPicUrl, post.leaderName)"
-              alt="{{ post.leaderName }}"
-              tabindex="0"
-            />
+            <div>
+              <figure class="w-8 h-8 rounded-full mr-4 overflow-hidden">
+                <img
+                  class="object-cover m-auto"
+                  data-tippy-content="{{ post.leaderName }}"
+                  :src="getAvatar(post.leaderPicUrl, post.leaderName)"
+                  alt="{{ post.leaderName }}"
+                  tabindex="0"
+                />
+              </figure>
+            </div>
             <p class="w-full text-gray-600 text-xs md:text-sm">
               {{ post.leaderName }}
             </p>
@@ -158,6 +162,7 @@ export default {
         this.postStore.posts.forEach((post, index) => {
           const data = res[`leader${index}`];
           post.leaderName = data.name;
+          post.leaderPicUrl = data.picUrl;
         });
       });
     },
